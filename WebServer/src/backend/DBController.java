@@ -48,22 +48,22 @@ public class DBController
     	try
     	{
     		PreparedStatement updateStmt = conn.prepareStatement("SELECT COUNT(1) FROM tweet");
-			ResultSet resultSet = updateStmt.executeQuery();
-			resultSet.next();
-			int counter = resultSet.getInt(1);
-			if(counter > 2000)
-				deleteEntry();
-			resultSet.close();
-		} catch (SQLException e) { e.printStackTrace(); }
+		ResultSet resultSet = updateStmt.executeQuery();
+		resultSet.next();
+		int counter = resultSet.getInt(1);
+		if(counter > 2000)
+			deleteEntry();
+		resultSet.close();
+	} catch (SQLException e) { e.printStackTrace(); }
     }
 
     public void deleteEntry()
     {
     	try
     	{
-			PreparedStatement deleteStmt = conn.prepareStatement(deleteSQL);
-			deleteStmt.executeUpdate();
-		} catch (SQLException e) { e.printStackTrace(); }
+		PreparedStatement deleteStmt = conn.prepareStatement(deleteSQL);
+		deleteStmt.executeUpdate();
+	} catch (SQLException e) { e.printStackTrace(); }
     }
 
 
@@ -74,40 +74,39 @@ public class DBController
     	if(para.length < 2)
     		return ans;
     	String timeslot = para[0], type = para[1];
-    	int range = (Integer.parseInt(timeslot) + 300) * 60;
+    	int range = Integer.parseInt(timeslot) * 60;
     	try
     	{
-    		//Calendar curTime = Calendar.getInstance(TimeZone.getTimeZone("EST"));
-    		Calendar curTime = Calendar.getInstance();
-  		  	curTime.add(Calendar.SECOND, 0 - range);
-  		  	java.sql.Timestamp startTime = uDateToSDate(curTime.getTime());
-  		  	PreparedStatement selectStmt = conn.prepareStatement(selectSQL);
-  		  	List<String> types = new ArrayList<>();
-  		  	if(type.equals("all"))
-  		  	{
-  		  		types.add("tech");
-  		  		types.add("music");
-  		  		types.add("food");
-  		  		types.add("sports");
-  		  	}
-  		  	else
-  		  		types.add(type);
-  		  	for(String eleType : types)
-  		  	{
-  		  		selectStmt.setTimestamp(1, startTime);
-  		  		selectStmt.setString(2, eleType);
-  		  		ResultSet rs = selectStmt.executeQuery();
-  		  		while(rs.next())
-  		  		{
-  		  			double latitude = rs.getDouble("latitude");
-  		  			double longitude = rs.getDouble("longitude");
-  		  			String statusID = rs.getString("statusId");
-  		  			String sentiment = rs.getString("sentiment");
-  		  			GeoInfor tmp = new GeoInfor(latitude, longitude, sentiment, statusID);
-  		  			ans.add(tmp);
-  		  		}
-  		  		rs.close();
-  		  	}
+    		Calendar curTime = Calendar.getInstance(TimeZone.getTimeZone("EST"));
+  	  	curTime.add(Calendar.SECOND, 0 - range);
+ 	  	java.sql.Timestamp startTime = uDateToSDate(curTime.getTime());
+ 	  	PreparedStatement selectStmt = conn.prepareStatement(selectSQL);
+  	  	List<String> types = new ArrayList<>();
+  	  	if(type.equals("all"))
+  	  	{
+  	  		types.add("tech");
+  	  		types.add("music");
+  	  		types.add("food");
+  	  		types.add("sports");
+  	  	}
+  	  	else
+  	  		types.add(type);
+  	  	for(String eleType : types)
+  	  	{
+  	  		selectStmt.setTimestamp(1, startTime);
+  	  		selectStmt.setString(2, eleType);
+  	  		ResultSet rs = selectStmt.executeQuery();
+  	  		while(rs.next())
+  	  		{
+  	  			double latitude = rs.getDouble("latitude");
+  	  			double longitude = rs.getDouble("longitude");
+  	  			String statusID = rs.getString("statusId");
+  	  			String sentiment = rs.getString("sentiment");
+  	  			GeoInfor tmp = new GeoInfor(latitude, longitude, sentiment, statusID);
+  	  			ans.add(tmp);
+  	  		}
+  	  		rs.close();
+  	  	}
     	}catch(SQLException e){e.printStackTrace();}
     	return ans;
     }
